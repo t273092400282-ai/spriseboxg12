@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwNzgxNTYxODE2NjE5MzUzNjY2OSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzRkYTUyYWE4MWExM2NkODNfaW5kZXguaHRtbC05OTAifSwiZXhwIjoxNzkxMjY5ODYxLCJpYXQiOjE3OTEyNjYyNjEsImFsZyI6IlJTMjU2In0.TGMb-PJUmzILhdKXwq2WjxVZljwyuEsnTnDEPXPMmDk6wVc9aPck3cATtoaCryotgu37t5fdBKI3QrHWKGEJkmj-4A_l4GLMZExaEzDTmHBTYB-uq5Y8qyub0YHDP6SIgYEr7VnQjr3fwJcMRrU3uoFKEakkKWS6uNxLUHBoB6xFvmRoe5uJGkuRhd4sCEDEX4cTKcjBsXVx-HujdSgc4Rd64VQLBnQUsTGTZGd3cPJkIRLGdYcMXCygAtKUFXYUrqh_MewIAB4ripxCxGimd0tdD-LZAWdz7nnRWFGSSMpEI4nSYiUoHj0hvZ1bzezZzEKzJ3dFnJGZPrb6vfhSCw","c_4da52aa81a13cd83_index.html-990")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة صندوق المفاجآت - البلاغة العربية</title>
+    <style>
+        /* أنماط وتنسيقات مدمجة بالكامل لتعمل اللعبة دون الحاجة لأي اتصال بالإنترنت */
+        :root {
+            --bg-main: #0b1120;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --accent-gold: #f59e0b;
+            --accent-yellow: #fbbf24;
+            --emerald-accent: #10b981;
+            --rose-accent: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+            min-height: 100vh;
+            color: var(--text-main);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* رأس الصفحة */
+        header {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 1.25rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .brand-icon {
+            width: 3.25rem;
+            height: 3.25rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .brand-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent-yellow);
+        }
+
+        .brand-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+
+        /* لوحة العدادات والإحصائيات */
+        .controls-section {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #334155;
+            border-radius: 0.85rem;
+            padding: 0.4rem 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+
+        .btn {
+            border: none;
+            outline: none;
+            cursor: pointer;
+            border-radius: 0.85rem;
+            padding: 0.55rem 0.95rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+        }
+        .btn-restart:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+        .btn-download:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-sound {
+            background: #334155;
+            color: #f1f5f9;
+            padding: 0.55rem 0.8rem;
+        }
+
+        /* شبكة الصناديق */
+        .intro-text {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .intro-text h2 {
+            font-size: 1.25rem;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+        .intro-text p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .boxes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .boxes-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.25rem;
+            }
+        }
+
+        .box-card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 1.25rem;
+            border: 2px solid;
+            padding: 1.25rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .box-card:hover:not(.opened) {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(245, 158, 11, 0.3);
+        }
+
+        .box-card.opened {
+            background: rgba(15, 23, 42, 0.6);
+            border-color: #334155 !important;
+            filter: grayscale(0.5);
+            cursor: default;
+        }
+
+        .box-num-badge {
+            position: absolute;
+            top: -0.6rem;
+            right: 0.9rem;
+            padding: 0.15rem 0.55rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            border-radius: 9999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .box-icon-wrap {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            margin-bottom: 0.75rem;
+            box-shadow: inset 0 2px 6px rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .box-card:hover:not(.opened) .box-icon-wrap {
+            transform: rotate(6deg) scale(1.08);
+        }
+
+        .box-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .box-subtitle {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        /* النوافذ المنبثقة (Modals) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-body {
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+            border: 2px solid rgba(245, 158, 11, 0.6);
+            border-radius: 1.5rem;
+            max-width: 580px;
+            width: 100%;
+            padding: 1.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: right;
+        }
+
+        .modal-overlay.active .modal-body {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .badge-tag {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #020617;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.2rem 0.75rem;
+            border-radius: 9999px;
+        }
+
+        .points-tag {
+            color: var(--accent-yellow);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .sentence-box {
+            background: rgba(2, 6, 23, 0.7);
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sentence-label {
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .sentence-content {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fef08a;
+            line-height: 1.6;
+        }
+
+        .question-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        /* خيارات الأسئلة */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .option-button {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #475569;
+            border-radius: 0.85rem;
+            padding: 0.85rem 1rem;
+            color: #f8fafc;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .option-button:hover:not(:disabled) {
+            background: rgba(51, 65, 85, 0.9);
+            border-color: var(--accent-gold);
+            transform: translateX(-4px);
+        }
+
+        .option-letter {
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 50%;
+            border: 1px solid #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-right: 0.5rem;
+        }
+
+        .option-button.correct {
+            background: rgba(6, 78, 59, 0.8) !important;
+            border-color: var(--emerald-accent) !important;
+            color: #a7f3d0 !important;
+        }
+
+        .option-button.wrong {
+            background: rgba(136, 19, 55, 0.8) !important;
+            border-color: var(--rose-accent) !important;
+            color: #fecdd3 !important;
+        }
+
+        /* التغذية الراجعة */
+        .feedback-box {
+            display: none;
+            border-radius: 0.85rem;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .feedback-box.correct {
+            display: block;
+            background: rgba(6, 78, 59, 0.3);
+            border-color: rgba(16, 185, 129, 0.5);
+            color: #6ee7b7;
+        }
+
+        .feedback-box.wrong {
+            display: block;
+            background: rgba(136, 19, 55, 0.3);
+            border-color: rgba(244, 63, 94, 0.5);
+            color: #fda4af;
+        }
+
+        .btn-continue {
+            background: linear-gradient(135deg, #f59e0b, #eab308);
+            color: #020617;
+            font-weight: 800;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.85rem;
+            font-size: 0.95rem;
+            display: none;
+            margin-right: auto;
+        }
+
+        /* نافذة النتيجة والفوز */
+        .victory-body {
+            text-align: center;
+        }
+        .victory-trophy {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            animation: bounce 1.5s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .victory-stats {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        /* قماش الاحتفالات (Canvas Confetti بدون إنترنت) */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confettiCanvas" width="948" height="828"></canvas>
+
+    <header class="container">
+        <div class="brand-section">
+            <div class="brand-icon">🎁</div>
+            <div>
+                <h1 class="brand-title">صندوق المفاجآت: البلاغة العربية</h1>
+                <p class="brand-desc">أغراض الخبر (فائدة الخبر - لازم الفائدة) والمسند والمسند إليه</p>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="stat-card">
+                <span style="color:#fbbf24;">⭐</span>
+                <div>
+                    <div class="stat-label">النقاط المكتسبة</div>
+                    <div id="scoreDisplay" class="stat-value" style="color:#fbbf24;">0</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span style="color:#818cf8;">📦</span>
+                <div>
+                    <div class="stat-label">المفتوح</div>
+                    <div id="progressDisplay" class="stat-value" style="color:#818cf8;">1 / 8</div>
+                </div>
+            </div>
+
+            <button id="soundBtn" onclick="toggleAudio()" class="btn btn-sound" title="تشغيل/كتم الصوت">
+                🔊
+            </button>
+
+            <!-- زر التنزيل والحفظ دون إنترنت -->
+            <button onclick="downloadGameHTML()" class="btn btn-download" title="تحميل ملف اللعبة للتشغيل في أي وقت دون اتصال">
+                <span>💾</span>
+                <span>حفظ اللعبة بدون إنترنت</span>
+            </button>
+
+            <button onclick="resetGame()" class="btn btn-restart" title="إعادة بدء اللعبة">
+                <span>🔄</span>
+                <span>إعادة اللعب</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="intro-text">
+            <h2>انقر فوق أحد الصناديق لاكتشاف السؤال وحصد النقاط! 🌟</h2>
+            <p>جميع الأسئلة والأمثلة مأخوذة من مقرر البلاغة المعتمد</p>
+        </div>
+
+        <div id="boxesGrid" class="boxes-grid"><div class="box-card opened" style="border-color: rgb(51, 65, 85);">
+                    <div class="box-num-badge" style="background: #475569; color: #f1f5f9;">
+                        #1
+                    </div>
+                    <div class="box-icon-wrap" style="background: #1e293b;">
+                        ✅
+                    </div>
+                    <div class="box-title" style="text-decoration: line-through; color: #64748b;">
+                        صندوق مفتوح
+                    </div>
+                    <div class="box-subtitle" style="color: #10b981;">
+                        تم الإنجاز 🎉
+                    </div>
+                </div><div class="box-card " style="border-color: rgb(96, 165, 250);">
+                    <div class="box-num-badge" style="background: #93c5fd; color: #0f172a;">
+                        #2
+                    </div>
+                    <div class="box-icon-wrap" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);">
+                        💎
+                    </div>
+                    <div class="box-title" style="">
+                        صندوق 2
+                    </div>
+                    <div class="box-subtitle" style="color: #94a3b8;">
+                        اضغط للفتح 🔑
+                    </div>
+                </div><div class="box-card " style="border-color: rgb(52, 211, 153);">
+                    <div class="box-num-badge" style="background: #a7f3d0; color: #0f172a;">
+                        #3
+                    </div>
+                    <div class="box-icon-wrap" style="background: linear-gradient(135deg, #059669, #047857);">
+                        📜
+                    </div>
+                    <div class="box-title" style="">
+                        صندوق 3
+                    </div>
+                    <div class="box-subtitle" style="color: #94a3b8;">
+                        اضغط للفتح 🔑
+                    </div>
+                </div><div class="box-card " style="border-color: rgb(167, 139, 250);">
+                    <div class="box-num-badge" style="background: #c4b5fd; color: #0f172a;">
+                        #4
+                    </div>
+                    <div class="box-icon-wrap" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">
+                        🔮
+                    </div>
+                    <div class="box-title" style="">
+                        صندوق 4
+                    </div>
+                    <div class="box-subtitle" style="color: #94a3b8;">
+                        اضغط للفتح 🔑
+                    </div>
+                </div><div class="box-card " style="border-color: rgb(251, 113, 133);">
+                    <div class="box-num-badge" style="background: #fecdd3; color: #0f172a;">
+                        #5
+                    </div>
+                    <div class="box-icon-wrap" style="background: linear-gradient(135deg, #e11d48, #be123c);">
+                        👑
+                    </div>
+                    <div class="box-title" style="">
+                        صندوق 5
+                    </div>
+                    <div class="box-subtitle" style="color: #94a3b8;">
+                        اضغط للفتح 🔑
+                    </div>
+                </div><div class="box-card " style="border-color: rgb(34, 211, 238);">
+                    <div class="box-num-badge" style="background: #a5f3fc; color: #0f172a;">
+                        #6
+                    </div>
+                    <div class="box-icon-wrap" style="background: linear-gradient(135deg, #0891b2, #0e7490);">
+                        🏺
+                    </div>
+                    <div class="box-title" style="">
+                        صندوق 6
+                    </div>
+                    <div class="box-subtitle" style="color: #94a3b8;">
+                        اضغط للفتح 🔑
+                    </div>
+                </div><div class="box-card " style="border-color: rgb(232, 121, 249);">
+                    <div class="box-num-badge" style="background: #f5d0fe; color: #0f172a;">
+                        #7
+                    </div>
+                    <div class="box-icon-wrap" style="background: linear-gradient(135deg, #c026d3, #a21caf);">
+                        ✨
+                    </div>
+                    <div class="box-title" style="">
+                        صندوق 7
+                    </div>
+                    <div class="box-subtitle" style="color: #94a3b8;">
+                        اضغط للفتح 🔑
+                    </div>
+                </div><div class="box-card " style="border-color: rgb(129, 140, 248);">
+                    <div class="box-num-badge" style="background: #c7d2fe; color: #0f172a;">
+                        #8
+                    </div>
+                    <div class="box-icon-wrap" style="background: linear-gradient(135deg, #4f46e5, #4338ca);">
+                        🏆
+                    </div>
+                    <div class="box-title" style="">
+                        صندوق 8
+                    </div>
+                    <div class="box-subtitle" style="color: #94a3b8;">
+                        اضغط للفتح 🔑
+                    </div>
+                </div></div>
+    </main>
+
+    <div id="questionModal" class="modal-overlay">
+        <div class="modal-body">
+            <div class="modal-header-badge">
+                <span id="modalBadge" class="badge-tag">صندوق المفاجأة #1</span>
+                <span class="points-tag">+100 نقطة ✨</span>
+            </div>
+
+            <div class="sentence-box">
+                <div class="sentence-label">المثال البلاغي:</div>
+                <div id="modalSentence" class="sentence-content">«العلمُ مفيدٌ في تطوير الفرد والمجتمع»</div>
+            </div>
+
+            <div id="modalQuestion" class="question-label">حدّد كلاً من (المسند إليه) و (المسند) في الجملة الاسمية السابقة:</div>
+
+            <div id="optionsContainer" class="options-list"><button class="option-button correct" disabled="">
+                    <span>المسند إليه: العلم (مبتدأ) | المسند: مفيد (خبر)</span>
+                    <span class="option-letter">أ</span>
+                </button><button class="option-button wrong" disabled="">
+                    <span>المسند إليه: مفيد | المسند: العلم</span>
+                    <span class="option-letter">ب</span>
+                </button><button class="option-button" disabled="">
+                    <span>المسند إليه: تطوير | المسند: الفرد</span>
+                    <span class="option-letter">ج</span>
+                </button><button class="option-button" disabled="">
+                    <span>المسند إليه: المجتمع | المسند: مفيد</span>
+                    <span class="option-letter">د</span>
+                </button></div>
+
+            <div id="feedbackBox" class="feedback-box wrong">
+                <div id="feedbackTitle" style="font-weight: 800; margin-bottom: 0.35rem;">💡 التغذية الراجعة التوضيحية:</div>
+                <div id="feedbackText">أحسنت! في الجملة الاسمية يكون (المبتدأ: العلم) هو المسند إليه، و(الخبر: مفيد) هو المسند الذي أسندناه إلى المبتدأ، والجار والمجرور قيد.</div>
+            </div>
+
+            <button id="continueBtn" onclick="closeModal()" class="btn btn-continue" style="display: inline-flex;">
+                متابعة فتح الصناديق 🚀
+            </button>
+        </div>
+    </div>
+
+    <div id="victoryModal" class="modal-overlay">
+        <div class="modal-body victory-body">
+            <div class="victory-trophy">🏆</div>
+            <h2 style="font-size: 1.6rem; color: #fbbf24; margin-bottom: 0.5rem; font-weight: 800;">
+                مبارك! أنهيت جميع صناديق المفاجآت
+            </h2>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">
+                لقد برهنت على إتقان رائع لمبحث أغراض الخبر وأركان الجملة في البلاغة العربية!
+            </p>
+
+            <div class="victory-stats">
+                <div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">مجموع النقاط</div>
+                    <div id="finalScore" style="font-size: 1.5rem; font-weight: 900; color: #fbbf24;">0</div>
+                </div>
+                <div style="width: 1px; background: #334155;"></div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">التقدير النهائي</div>
+                    <div id="finalRank" style="font-size: 1.1rem; font-weight: 800; color: #34d399;">فارس البلاغة</div>
+                </div>
+            </div>
+
+            <button onclick="resetGame()" class="btn btn-restart" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1rem;">
+                🔄 خوض التحدي من جديد
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        مادة اللغة العربية • البلاغة: أغراض الخبر (فائدة الخبر - لازم الفائدة) والمسند والمسند إليه
+    </footer>
+
+    <script>
+        /* بنك الأسئلة المأخوذ نصاً من درس أغراض الخبر */
+        const rhetoricalQuestions = [
+            {
+                id: 1,
+                title: "الصندوق الأول: أركان الجملة",
+                sentence: "«العلمُ مفيدٌ في تطوير الفرد والمجتمع»",
+                question: "حدّد كلاً من (المسند إليه) و (المسند) في الجملة الاسمية السابقة:",
+                options: [
+                    { text: "المسند إليه: العلم (مبتدأ) | المسند: مفيد (خبر)", correct: true },
+                    { text: "المسند إليه: مفيد | المسند: العلم", correct: false },
+                    { text: "المسند إليه: تطوير | المسند: الفرد", correct: false },
+                    { text: "المسند إليه: المجتمع | المسند: مفيد", correct: false }
+                ],
+                feedback: "أحسنت! في الجملة الاسمية يكون (المبتدأ: العلم) هو المسند إليه، و(الخبر: مفيد) هو المسند الذي أسندناه إلى المبتدأ، والجار والمجرور قيد."
+            },
+            {
+                id: 2,
+                title: "الصندوق الثاني: السيرة والتاريخ",
+                sentence: "«وُلِد النبي ﷺ عام الفيل، وأُوحيَ إليه في سن الأربعين»",
+                question: "المتكلم هنا يخبر شخصاً يجهل هذا الحكم، فما هو الغرض البلاغي الأصلي للخبر؟",
+                options: [
+                    { text: "فائدة الخبر", correct: true },
+                    { text: "لازم الفائدة", correct: false },
+                    { text: "إظهار الضعف", correct: false },
+                    { text: "التحسر والألم", correct: false }
+                ],
+                feedback: "ممتاز! الغرض هو (فائدة الخبر)؛ لأن المخاطب يجهل الحكم في الأصل، فالمتكلم يفيده بحكم ومعلومة جديدة لم يكن يعلمها."
+            },
+            {
+                id: 3,
+                title: "الصندوق الثالث: مكارم الأخلاق",
+                sentence: "«إنك لتكظم الغيظَ، وتحلم عند الغضب، وتعفو مع القدرة»",
+                question: "المخاطب يعلم خلقه وأفعاله، فما الغرض الذي يقصده المتكلم من إخباره بذلك؟",
+                options: [
+                    { text: "لازم الفائدة", correct: true },
+                    { text: "فائدة الخبر", correct: false },
+                    { text: "الاسترحام", correct: false },
+                    { text: "التحذير", correct: false }
+                ],
+                feedback: "رائع جداً! الغرض هو (لازم الفائدة)؛ لأن المخاطب يعلم هذه الصفات في نفسه، والغرض من إخباره إعلامه بأن المتكلم عالمٌ بحاله وبأخلاقه."
+            },
+            {
+                id: 4,
+                title: "الصندوق الرابع: حقائق جغرافية",
+                sentence: "«القدسُ عاصمةُ دولة فلسطين الأبدية»",
+                question: "ما الغرض البلاغي من الجملة الخبرية السابقة حين نلقيها لإفادة السامع؟",
+                options: [
+                    { text: "فائدة الخبر", correct: true },
+                    { text: "لازم الفائدة", correct: false },
+                    { text: "التعجب", correct: false },
+                    { text: "السخرية", correct: false }
+                ],
+                feedback: "إجابة صحيحة! الغرض هو (فائدة الخبر)؛ لأن القصد إيصال ونقل مضمون الحكم والمعلومة الصادقة إلى علم المخاطب."
+            },
+            {
+                id: 5,
+                title: "الصندوق الخامس: شؤون الحياة",
+                sentence: "«أنتَ رجعتَ من السفر مع والدك في الأسبوع الماضي»",
+                question: "ما الغرض البلاغي الأصلي من هذا الخبر للمخاطب؟",
+                options: [
+                    { text: "لازم الفائدة", correct: true },
+                    { text: "فائدة الخبر", correct: false },
+                    { text: "الفخر والاعتزاز", correct: false },
+                    { text: "النصح والإرشاد", correct: false }
+                ],
+                feedback: "صواب! الغرض هو (لازم الفائدة)؛ لأن الشخص الذي عاد من السفر يعلم يقيناً أنه رجع مع والده، والمتكلم يريد بيان أنه عالمٌ بوقوع السفر."
+            },
+            {
+                id: 6,
+                title: "الصندوق السادس: التحدي الذكي",
+                sentence: "«الماء يتكون من عنصري الهيدروجين والأكسجين بنسبة 2 إلى 1» (حين يخبر به تلميذٌ معلمَ الكيمياء)",
+                question: "ما الغرض البلاغي من كلام التلميذ لمعلمه الذي يعرف هذه الحقيقة جيداً؟",
+                options: [
+                    { text: "لازم الفائدة (لإشعار المعلم بعلمه بالدرس)", correct: true },
+                    { text: "فائدة الخبر (لأن المعلم لا يعرف المعلومة)", correct: false },
+                    { text: "التحسر وإظهار العجز", correct: false },
+                    { text: "الاستعطاف وطلب المغفرة", correct: false }
+                ],
+                feedback: "ذكي جداً! المعلم يعلم هذا الحكم تماماً، ولذلك التلميذ لا يعطيه معلومة جديدة، بل يريد إعلام المعلم بأنه (أي الطالب) قد حفظ وفهم المعلومة."
+            },
+            {
+                id: 7,
+                title: "الصندوق السابع: الجملة الفعلية",
+                sentence: "«أثّرتْ وسائلُ الاتصال الحديثة في عادات الشعوب»",
+                question: "أين (المسند) و(المسند إليه) في هذه الجملة الفعلية؟",
+                options: [
+                    { text: "المسند: أثّرت (الفعل) | المسند إليه: وسائلُ (الفاعل)", correct: true },
+                    { text: "المسند: وسائل (الفاعل) | المسند إليه: أثرت (الفعل)", correct: false },
+                    { text: "المسند: الشعوب | المسند إليه: عادات", correct: false },
+                    { text: "المسند: الاتصال | المسند إليه: الحديثة", correct: false }
+                ],
+                feedback: "مبدع! القاعدة البلاغية: في الجملة الفعلية، الفعل (أثّرت) هو (المسند)، والفاعل (وسائل) هو (المسند إليه) الذي أسندنا إليه التأثير."
+            },
+            {
+                id: 8,
+                title: "الصندوق الثامن: أعلام وتاريخ",
+                sentence: "«كان عمرُ بن عبد العزيز لا يأخذ من بيت المال شيئاً» (لشخص لا يعلم زهد هذا الخليفة)",
+                question: "ما الغرض من إلقاء هذا الخبر؟",
+                options: [
+                    { text: "فائدة الخبر", correct: true },
+                    { text: "لازم الفائدة", correct: false },
+                    { text: "التهكم والاستهزاء", correct: false },
+                    { text: "التمني", correct: false }
+                ],
+                feedback: "رائع جداً! بما أن السامع كان يجهل هذا الحكم عن زهد عمر بن عبد العزيز، فإن الخبر أفاده حكماً جديداً وهو (فائدة الخبر)."
+            }
+        ];
+
+        let score = 0;
+        let openedCount = 0;
+        let isAudioMuted = false;
+        let activeBoxIndex = null;
+        let boxStates = Array(8).fill(false);
+
+        /* محاكي صوت نقي يعتمد على Web Audio API الأصلي دون الحاجة لأي مكتبة خارجية */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type = 'sine', duration = 0.15, delay = 0) {
+            if (isAudioMuted) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(audioCtx.currentTime + delay);
+                osc.stop(audioCtx.currentTime + delay + duration);
+            } catch (e) {
+                // هدوء عند قيود المتصفح
+            }
+        }
+
+        function playSound(action) {
+            if (isAudioMuted) return;
+            if (action === 'open') {
+                playTone(440, 'triangle', 0.1, 0);
+                playTone(660, 'triangle', 0.15, 0.08);
+            } else if (action === 'correct') {
+                playTone(523.25, 'sine', 0.12, 0);      // C5
+                playTone(659.25, 'sine', 0.12, 0.1);    // E5
+                playTone(783.99, 'sine', 0.25, 0.2);    // G5
+                playTone(1046.50, 'triangle', 0.35, 0.3); // C6
+            } else if (action === 'wrong') {
+                playTone(260, 'sawtooth', 0.18, 0);
+                playTone(200, 'sawtooth', 0.25, 0.15);
+            } else if (action === 'fanfare') {
+                const notes = [523.25, 659.25, 783.99, 1046.5];
+                notes.forEach((f, i) => playTone(f, 'triangle', 0.3, i * 0.15));
+            }
+        }
+
+        function toggleAudio() {
+            isAudioMuted = !isAudioMuted;
+            const soundBtn = document.getElementById('soundBtn');
+            soundBtn.textContent = isAudioMuted ? '🔇' : '🔊';
+            soundBtn.style.opacity = isAudioMuted ? '0.6' : '1';
+        }
+
+        /* محرك قصاصات احتفالية نقي (Pure Canvas Confetti) دون الحاجة لاتصال بالإنترنت */
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
+        let confettiAnimationId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createConfetti(count = 70) {
+            const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#eab308'];
+            for (let i = 0; i < count; i++) {
+                confettiParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: canvas.height * 0.4 + (Math.random() * 50),
+                    w: Math.random() * 8 + 4,
+                    h: Math.random() * 10 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 1.2) * 9,
+                    tilt: Math.random() * 10,
+                    tiltAngle: 0,
+                    tiltAngleInc: Math.random() * 0.08 + 0.04,
+                    opacity: 1
+                });
+            }
+            if (!confettiAnimationId) {
+                renderConfetti();
+            }
+        }
+
+        function renderConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = confettiParticles.length - 1; i >= 0; i--) {
+                const p = confettiParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // الجاذبية
+                p.tiltAngle += p.tiltAngleInc;
+                p.tilt = Math.sin(p.tiltAngle) * 12;
+                p.opacity -= 0.007;
+
+                if (p.opacity <= 0 || p.y > canvas.height) {
+                    confettiParticles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = Math.max(0, p.opacity);
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.tiltAngle);
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            }
+
+            if (confettiParticles.length > 0) {
+                confettiAnimationId = requestAnimationFrame(renderConfetti);
+            } else {
+                confettiAnimationId = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        const boxThemes = [
+            { bg: 'linear-gradient(135deg, #d97706, #b45309)', border: '#f59e0b', badge: '#fbbf24', icon: '🎁' },
+            { bg: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: '#60a5fa', badge: '#93c5fd', icon: '💎' },
+            { bg: 'linear-gradient(135deg, #059669, #047857)', border: '#34d399', badge: '#a7f3d0', icon: '📜' },
+            { bg: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: '#a78bfa', badge: '#c4b5fd', icon: '🔮' },
+            { bg: 'linear-gradient(135deg, #e11d48, #be123c)', border: '#fb7185', badge: '#fecdd3', icon: '👑' },
+            { bg: 'linear-gradient(135deg, #0891b2, #0e7490)', border: '#22d3ee', badge: '#a5f3fc', icon: '🏺' },
+            { bg: 'linear-gradient(135deg, #c026d3, #a21caf)', border: '#e879f9', badge: '#f5d0fe', icon: '✨' },
+            { bg: 'linear-gradient(135deg, #4f46e5, #4338ca)', border: '#818cf8', badge: '#c7d2fe', icon: '🏆' }
+        ];
+
+        function renderBoxes() {
+            const grid = document.getElementById('boxesGrid');
+            grid.innerHTML = '';
+
+            rhetoricalQuestions.forEach((q, index) => {
+                const isOpened = boxStates[index];
+                const theme = boxThemes[index % boxThemes.length];
+
+                const card = document.createElement('div');
+                card.className = `box-card ${isOpened ? 'opened' : ''}`;
+                card.style.borderColor = isOpened ? '#334155' : theme.border;
+                card.onclick = () => openBox(index);
+
+                card.innerHTML = `
+                    <div class="box-num-badge" style="background: ${isOpened ? '#475569' : theme.badge}; color: ${isOpened ? '#f1f5f9' : '#0f172a'};">
+                        #${index + 1}
+                    </div>
+                    <div class="box-icon-wrap" style="background: ${isOpened ? '#1e293b' : theme.bg};">
+                        ${isOpened ? '✅' : theme.icon}
+                    </div>
+                    <div class="box-title" style="${isOpened ? 'text-decoration: line-through; color: #64748b;' : ''}">
+                        ${isOpened ? 'صندوق مفتوح' : 'صندوق ' + (index + 1)}
+                    </div>
+                    <div class="box-subtitle" style="color: ${isOpened ? '#10b981' : '#94a3b8'};">
+                        ${isOpened ? 'تم الإنجاز 🎉' : 'اضغط للفتح 🔑'}
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('progressDisplay').textContent = `${openedCount} / 8`;
+        }
+
+        function openBox(index) {
+            if (boxStates[index]) return;
+
+            activeBoxIndex = index;
+            playSound('open');
+
+            const q = rhetoricalQuestions[index];
+
+            document.getElementById('modalBadge').textContent = `صندوق المفاجأة #${index + 1}`;
+            document.getElementById('modalSentence').textContent = q.sentence;
+            document.getElementById('modalQuestion').textContent = q.question;
+
+            // إعادة ضبط التغذية الراجعة
+            const feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.className = "feedback-box";
+            document.getElementById('continueBtn').style.display = 'none';
+
+            // بناء الخيارات
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            const arabicLetters = ['أ', 'ب', 'ج', 'د'];
+            q.options.forEach((opt, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-button';
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <span class="option-letter">${arabicLetters[optIdx]}</span>
+                `;
+                btn.onclick = () => selectOption(optIdx);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('questionModal').classList.add('active');
+        }
+
+        function selectOption(chosenIdx) {
+            const q = rhetoricalQuestions[activeBoxIndex];
+            const isCorrect = q.options[chosenIdx].correct;
+            const buttons = document.querySelectorAll('.option-button');
+
+            // إيقاف التفاعل مع الخيارات
+            buttons.forEach(b => b.disabled = true);
+
+            const feedbackBox = document.getElementById('feedbackBox');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackText = document.getElementById('feedbackText');
+            const continueBtn = document.getElementById('continueBtn');
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 100;
+                document.getElementById('scoreDisplay').textContent = score;
+                buttons[chosenIdx].classList.add('correct');
+
+                createConfetti(45);
+
+                feedbackBox.className = "feedback-box correct";
+                feedbackTitle.textContent = "🎉 إجابة صحيحة وموفقة (+100 نقطة)!";
+                feedbackText.textContent = q.feedback;
+            } else {
+                playSound('wrong');
+                buttons[chosenIdx].classList.add('wrong');
+
+                // إبراز الخيار الصحيح للتعلم
+                q.options.forEach((opt, idx) => {
+                    if (opt.correct) {
+                        buttons[idx].classList.add('correct');
+                    }
+                });
+
+                feedbackBox.className = "feedback-box wrong";
+                feedbackTitle.textContent = "💡 التغذية الراجعة التوضيحية:";
+                feedbackText.textContent = q.feedback;
+            }
+
+            boxStates[activeBoxIndex] = true;
+            openedCount++;
+            document.getElementById('progressDisplay').textContent = `${openedCount} / 8`;
+
+            continueBtn.style.display = 'inline-flex';
+        }
+
+        function closeModal() {
+            document.getElementById('questionModal').classList.remove('active');
+            renderBoxes();
+
+            if (openedCount === 8) {
+                setTimeout(showVictory, 350);
+            }
+        }
+
+        function showVictory() {
+            playSound('fanfare');
+            createConfetti(120);
+
+            document.getElementById('finalScore').textContent = `${score} / 800`;
+
+            let rank = "طالب مجتهد 🌟";
+            if (score >= 700) rank = "خبير البلاغة العبقري 👑";
+            else if (score >= 500) rank = "فارس البلاغة المتميز 🏅";
+
+            document.getElementById('finalRank').textContent = rank;
+            document.getElementById('victoryModal').classList.add('active');
+        }
+
+        function resetGame() {
+            score = 0;
+            openedCount = 0;
+            activeBoxIndex = null;
+            boxStates = Array(8).fill(false);
+
+            document.getElementById('questionModal').classList.remove('active');
+            document.getElementById('victoryModal').classList.remove('active');
+
+            renderBoxes();
+        }
+
+        /* وظيفة تحميل اللعبة كملف HTML مستقل كامل يمكن تشغيله دون إنترنت */
+        function downloadGameHTML() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'لعبة_صندوق_المفاجآت_البلاغة_العربية.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = function() {
+            renderBoxes();
+        };
+    </script>
+
+</body></html>
